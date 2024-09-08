@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .chat-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 10px;
+        }
+
+        .chat-container ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chat-container li {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .chat-container li:last-child {
+            border-bottom: none;
+        }
+
+        .chat-container .message-content {
+            margin-left: 10px;
+        }
+
+        .chat-container .message-content p {
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .chat-container .message-content time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-container textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+
+        .form-container button {
+            align-self: flex-end;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background: #0056b3;
+        }
+
+        .error-message {
+            color: #d9534f;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Messages with {{ recipient.username }}</h1>
+        <div class="chat-container">
+            <ul>
+                {% for message in chat_history %}
+                    <li>
+                        <div class="message-content">
+                            {% if message.sender == recipient %}
+                                <strong>{{ recipient.username }}:</strong>
+                            {% else %}
+                                <strong>You:</strong>
+                            {% endif %}
+                            <p>{{ message.content }}</p>
+                            <time>{{ message.timestamp|date:"g:i A" }}</time>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li>No messages yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="message" placeholder="Type your message here..." required></textarea>
+                <button type="submit">Send</button>
+            </form>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
