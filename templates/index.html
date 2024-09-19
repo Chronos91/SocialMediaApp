@@ -356,25 +356,29 @@
                                 <!-- <a href="#"> Refresh</a> -->
                             </div>
                            
-                            <div class="divide-gray-300 divide-gray-50 divide-opacity-50 divide-y px-4 ">
-
+                           <div class="divide-gray-300 divide-gray-50 divide-opacity-50 divide-y px-4">
                                 {% for suggestion in suggestions_username_profile_list %}
-                                <form action="/follow" method="POST">
                                 <div class="flex items-center justify-between py-3">
                                     <div class="flex flex-1 items-center space-x-4">
-                                        <a href="profile.html">
-                                            <img src="{{suggestion.profileimg.url}}" class="bg-gray-200 rounded-full w-10 h-10">
+                                        <a href="{% url 'profile' suggestion.user %}">
+                                            <img src="{{ suggestion.profileimg.url }}" class="bg-gray-200 rounded-full w-10 h-10">
                                         </a>
                                         <div class="flex flex-col">
-                                            <span class="block capitalize font-semibold"> {{suggestion.user}} </span>
-                                            <span class="block capitalize text-sm"> 320k followers </span>
+                                            <span class="block capitalize font-semibold">{{ suggestion.user }}</span>
+                                            <span class="block capitalize text-sm">320k followers</span>
                                         </div>
                                     </div>
-                                    <a href="#" class="border border-gray-200 font-semibold px-4 py-1 rounded-full hover:bg-pink-600 hover:text-white hover:border-pink-600 "> Follow </a>
+
+                                    <!-- Follow/Unfollow Button -->
+                                    <button id="follow-btn-{{ suggestion.user }}" class="follow-btn border border-gray-200 font-semibold px-4 py-1 rounded-full hover:bg-pink-600 hover:text-white hover:border-pink-600"
+                                            data-user="{{ suggestion.user }}" data-follower="{{ request.user.username }}">
+                                        Follow
+                                    </button>
                                 </div>
                                 {% endfor %}
-                                </form>
                             </div>
+
+
 
                         </div>
 
@@ -405,6 +409,39 @@
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".follow-btn").click(function(e) {
+                e.preventDefault();  // Prevent form submission and page reload
+
+                let user = $(this).data('user');
+                let follower = $(this).data('follower');
+                let csrf_token = '{{ csrf_token }}';  // Get CSRF token from Django
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'follow' %}",  // URL of the Django follow view
+                    data: {
+                        'follower': follower,
+                        'user': user,
+                        'csrfmiddlewaretoken': csrf_token,
+                    },
+                    success: function(response) {
+                        if (response.status === 'followed') {
+                            $(`#follow-btn-${user}`).text('Unfollow');
+                        } else {
+                            $(`#follow-btn-${user}`).text('Follow');
+                        }
+                    },
+                    error: function(response) {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+
 
 
     <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>

@@ -8,6 +8,7 @@ import uuid
 from itertools import chain
 import random
 from django.db.models import Q
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -297,19 +298,35 @@ def profile(request, pk):
 @login_required(login_url='signin')
 def follow(request):
     if request.method == 'POST':
+        follower = request.POST.get('follower')
+        user = request.POST.get('user')
+
+        if FollowersCount.objects.filter(follower=follower, user=user).exists():
+            FollowersCount.objects.get(follower=follower, user=user).delete()
+            return JsonResponse({'status': 'unfollowed'})  # Return unfollow status
+        else:
+            new_follower = FollowersCount.objects.create(follower=follower, user=user)
+            new_follower.save()
+            return JsonResponse({'status': 'followed'})  # Return follow status
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+""" def follow(request):
+    if request.method == 'POST':
         follower = request.POST['follower']
         user = request.POST['user']
 
         if FollowersCount.objects.filter(follower=follower, user=user).first():
             delete_follower = FollowersCount.objects.get(follower=follower, user=user)
             delete_follower.delete()
-            return redirect('/profile/' + user)
+            return redirect('/')
         else:
             new_follower = FollowersCount.objects.create(follower=follower, user=user)
             new_follower.save()
-            return redirect('/profile/' + user)
+            return redirect('/')
     else:
-        return redirect('/')
+        return redirect('/') """
 
 
 @login_required(login_url='signin')
