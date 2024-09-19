@@ -27,19 +27,22 @@
 	<section>
 			<div class="feature-photo">
 				<figure><img src="{% static 'images/resources/timeline-1.jpg' %}" alt=""></figure>
-				<form action="/follow" method="POST">
-					{% csrf_token %}
-					<div class="add-btn">
-					<span style="color: white; font-size: 27px; margin-left: 520px;"><b><u><a href="/">Home</a></u></b></span>
+				<form id="follow-form" action="/follow" method="POST">
+				{% csrf_token %}
+				<div class="add-btn">
+					<span style="color: white; font-size: 27px; margin-left: 520px;">
+						<b><u><a href="/">Home</a></u></b>
+					</span>
 
 					{% if user_post_length == 0 %}
-					<span style="color: white; font-size: 27px;"><b> No Post</b></span>
+					<span style="color: white; font-size: 27px;"><b>No Post</b></span>
 					{% elif user_post_length == 1 %}
 					<span style="color: white; font-size: 27px;"><b>{{user_post_length}} Post</b></span>
 					{% else %}
 					<span style="color: white; font-size: 27px;"><b>{{user_post_length}} Posts</b></span>
 					{% endif %}
-                    {% if user_followers == 0 or user_followers == 1 %}
+
+					{% if user_followers == 0 or user_followers == 1 %}
 					<span style="color: white; font-size: 27px;"><b>{{user_followers}} follower</b></span>
 					{% else %}
 					<span style="color: white; font-size: 27px;"><b>{{user_followers}} followers</b></span>
@@ -50,13 +53,13 @@
 					<input type="hidden" value="{{user.username}}" name="follower">
 					<input type="hidden" value="{{user_object.username}}" name="user">
 
-					{% if user_object.username == user.username%}
+					{% if user_object.username == user.username %}
 					<a href="/settings" data-ripple="">Account Settings</a>
 					{% else %}
-					<a data-ripple=""><button type="submit" style="background-color: #ffc0cb; border: #ffc0cb;">{{button_text}}</button></a>
+					<button type="button" id="follow-btn" style="background-color: #ffc0cb; border: #ffc0cb;">{{button_text}}</button>
 					{% endif %}
-					</div>
-				</form>
+				</div>
+			</form>
 
 				<!-- <form class="edit-phto">
 					<i class="fa fa-camera-retro"></i>
@@ -170,6 +173,33 @@
 	
 	<script data-cfasync="false" src="{% static '../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script><script src="{% static 'js/main.min.js' %}"></script>
 	<script src="{% static 'js/script.js' %}"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript">
+    $(document).ready(function() {
+        $('#follow-btn').click(function(e) {
+            e.preventDefault();  // Prevent default form submission
+            let form = $('#follow-form');
+            let url = form.attr('action');  // Get form action URL
+            let formData = form.serialize();  // Serialize the form data
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function(response) {
+                    if (response.status === 'followed') {
+                        $('#follow-btn').text('Unfollow');  // Change button text
+                    } else if (response.status === 'unfollowed') {
+                        $('#follow-btn').text('Follow');  // Change button text
+                    }
+                },
+                error: function(response) {
+                    alert('An error occurred.');
+                }
+            });
+        });
+    });
+</script>
 
 </body>	
 
